@@ -1,4 +1,3 @@
-use crate::TokenType::{CloseParam, OpenParam};
 
 #[derive(PartialEq, Debug)]
 enum TokenType {
@@ -29,10 +28,11 @@ impl Token {
     }
 
     fn float(&self) -> Option<f64> {
-        if self.token_type == TokenType::DIGITS {
-            self.token.parse()
+        return if self.token_type == TokenType::DIGITS {
+            self.token.parse().ok()
+        } else {
+            None
         }
-        None
     }
 
     fn is_operator(&self) -> bool {
@@ -109,16 +109,6 @@ fn tokenizer(input: &str) -> Vec<Token> {
     token_list
 }
 
-fn can_push_stack(token: &Token, stack: &Vec<&Token>) -> bool {
-    if stack.is_empty() {
-        return true;
-    }
-
-    stack.last().map_or(false, |last| -> bool {
-        last.token_type == TokenType::OpenParam || token.precedence() > last.precedence()
-    })
-}
-
 // algorithm from https://www.tutorialspoint.com/Convert-Infix-to-Postfix-Expression
 // Begin
 //    initially push some special character say # into the stack
@@ -166,9 +156,9 @@ fn convert_infix_postfix(infix: Vec<Token>) -> Vec<Token> {
     for token in infix {
         if token.is_operand() {
             postfix.push(token);
-        } else if token.token_type == OpenParam {
+        } else if token.token_type == TokenType::OpenParam {
             stack.push(token);
-        } else if token.token_type == CloseParam {
+        } else if token.token_type == TokenType::CloseParam {
             while stack.is_empty() == false {
                 let last = &stack[stack.len() - 1];
                 if last.token_type != TokenType::OpenParam {
