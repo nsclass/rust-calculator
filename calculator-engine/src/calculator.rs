@@ -4,8 +4,12 @@ use thiserror::Error;
 pub enum CalculateError {
     #[error("error on converting from a string to a float")]
     ParseError(std::num::ParseFloatError),
+    #[error("failed to calculate the operator")]
+    FailedCalculate(String),
+    #[error("stack is empty for calculation")]
+    StackEmptyCalculation,
     #[error("token is not a digit")]
-    NotDigitValue
+    NotDigitValue,
 }
 
 #[derive(PartialEq, Debug)]
@@ -29,7 +33,7 @@ impl Token {
     fn new(token: String, token_type: TokenType) -> Self {
         Self {
             token,
-            token_type
+            token_type,
         }
     }
     fn is_operand(&self) -> bool {
@@ -40,8 +44,8 @@ impl Token {
         return if self.token_type == TokenType::DIGITS {
             self.token.parse().map_err(|e| CalculateError::ParseError(e))
         } else {
-           Err(CalculateError::NotDigitValue)
-        }
+            Err(CalculateError::NotDigitValue)
+        };
     }
 
     fn is_operator(&self) -> bool {
@@ -169,8 +173,7 @@ fn convert_infix_postfix(infix: Vec<Token>) -> Vec<Token> {
         } else if token.token_type == TokenType::OpenParam {
             stack.push(token);
         } else if token.token_type == TokenType::CloseParam {
-            while stack.is_empty() == false {
-                let last = &stack[stack.len() - 1];
+            while let Some(last) = stack.last() {
                 if last.token_type != TokenType::OpenParam {
                     stack.pop().map(|t| postfix.push(t));
                 } else {
@@ -178,10 +181,8 @@ fn convert_infix_postfix(infix: Vec<Token>) -> Vec<Token> {
                     break;
                 }
             }
-
         } else {
-            while stack.is_empty() == false {
-                let last = &stack[stack.len() - 1];
+            while let Some(last) = stack.last() {
                 if last.precedence() >= token.precedence() {
                     stack.pop().map(|t| postfix.push(t));
                 } else {
@@ -204,27 +205,56 @@ fn print_token_list(token_list: &Vec<Token>) {
     println!()
 }
 
-fn calculate(postfix: &Vec<Token>) -> f64 {
-    todo!()
+fn calculate_token(operator: &Token, value1: &Token, value2: &Token) -> Result<f64, CalculateError> {
+    match &operator.token_type {
+        TokenType::PLUS => Ok(value1.float()? + value2.float()?),
+        TokenType::MINUS => Ok(value1.float()? - value2.float()?),
+        TokenType::MULTIPLY => Ok(value1.float()? * value2.float()?),
+        TokenType::DIVIDE => Ok(value1.float()? / value2.float()?),
+        _ => Err(CalculateError::FailedCalculate(format!("{} {} {}",
+                                                         value1.token.to_string(),
+                                                         operator.token.to_string(),
+                                                         value2.token.to_string(),
+        )))
+    }
+}
+
+fn calculate(postfix: Vec<Token>) -> Result<f64, CalculateError> {
+    let mut stack = Vec::new();
+
+    for token in postfix {
+        if token.is_operand() {
+            stack.push(token);
+        } else {
+            let value1 = stack.pop().ok_or(CalculateError::StackEmptyCalculation)?;
+            let value2 = stack.pop().ok_or(CalculateError::StackEmptyCalculation)?;
+            let res = calculate_token(&token, &value2, &value1)?;
+            let created_token = Token::new(res.to_string(), TokenType::DIGITS);
+            stack.push(created_token);
+        }
+    }
+
+    let res = stack.pop().map(|token| token.float()).ok_or(CalculateError::StackEmptyCalculation)?;
+    res
 }
 
 
 pub fn calculate_str(input: &str) -> Result<f64, CalculateError> {
-    todo!()
+    let infix = tokenizer(input);
+    print_token_list(&infix);
+    let postfix = convert_infix_postfix(infix);
+    print_token_list(&postfix);
+    calculate(postfix)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
     fn it_works() {
-        let input = "1 + 2 * (3 + 4) / 5"; // expected 1234+*5/+
-        let infix = tokenizer(input);
-        print_token_list(&infix);
-        let postfix = convert_infix_postfix(infix);
-        print_token_list(&postfix);
-        // let result = calculate(&postfix);
-        let result = 2 + 2;
-        assert_eq!(result, 4);
+        let input = "1 + 2 * (3 + 4) / 2"; // expected 1234+*2/+
+        let result = calculate_str(input).unwrap();
+        assert_eq!(result, 8.);
     }
 }
