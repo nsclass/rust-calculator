@@ -28,6 +28,13 @@ impl Token {
         self.token_type == TokenType::DIGITS
     }
 
+    fn float(&self) -> Option<f64> {
+        if self.token_type == TokenType::DIGITS {
+            self.token.parse()
+        }
+        None
+    }
+
     fn is_operator(&self) -> bool {
        match self.token_type {
            TokenType::PLUS | TokenType::MINUS | TokenType::MULTIPLY | TokenType::DIVIDE => true,
@@ -141,6 +148,17 @@ fn can_push_stack(token: &Token, stack: &Vec<&Token>) -> bool {
 //    done
 //    return postfix
 // End
+// int precedence(char ch) {
+//     if(ch == '+' || ch == '-') {
+//        return 1;              //Precedence of + or - is 1
+//     }else if(ch == '*' || ch == '/') {
+//        return 2;            //Precedence of * or / is 2
+//     }else if(ch == '^') {
+//        return 3;            //Precedence of ^ is 3
+//     }else {
+//        return 0;
+//     }
+// }
 
 fn convert_infix_postfix(infix: Vec<Token>) -> Vec<Token> {
     let mut postfix = Vec::new();
@@ -187,7 +205,6 @@ fn print_token_list(token_list: &Vec<Token>) {
 }
 
 fn calculate(postfix: &Vec<&Token>) -> f64 {
-
     todo!()
 }
 
