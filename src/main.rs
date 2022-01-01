@@ -112,6 +112,36 @@ fn can_push_stack(token: &Token, stack: &Vec<&Token>) -> bool {
     })
 }
 
+// algorithm from https://www.tutorialspoint.com/Convert-Infix-to-Postfix-Expression
+// Begin
+//    initially push some special character say # into the stack
+//    for each character ch from infix expression, do
+//       if ch is alphanumeric character, then
+//          add ch to postfix expression
+//       else if ch = opening parenthesis (, then
+//          push ( into stack
+//       else if ch = ^, then            //exponential operator of higher precedence
+//          push ^ into the stack
+//       else if ch = closing parenthesis ), then
+//          while stack is not empty and stack top ≠ (,
+//             do pop and add item from stack to postfix expression
+//          done
+//
+//          pop ( also from the stack
+//       else
+//          while stack is not empty AND precedence of ch <= precedence of stack top element, do
+//             pop and add into postfix expression
+//          done
+//
+//          push the newly coming character.
+//    done
+//
+//    while the stack contains some remaining characters, do
+//       pop and add to the postfix expression
+//    done
+//    return postfix
+// End
+
 fn convert_infix_postfix(infix: &Vec<Token>) -> Vec<&Token> {
     let mut postfix = Vec::new();
     let mut stack = Vec::new();
