@@ -1,4 +1,3 @@
-
 #[derive(PartialEq, Debug)]
 enum TokenType {
     DIGITS,
@@ -18,10 +17,10 @@ struct Token {
 
 impl Token {
     fn new(token: String, token_type: TokenType) -> Self {
-       Self {
-           token,
-           token_type
-       }
+        Self {
+            token,
+            token_type
+        }
     }
     fn is_operand(&self) -> bool {
         self.token_type == TokenType::DIGITS
@@ -36,10 +35,10 @@ impl Token {
     }
 
     fn is_operator(&self) -> bool {
-       match self.token_type {
-           TokenType::PLUS | TokenType::MINUS | TokenType::MULTIPLY | TokenType::DIVIDE => true,
-           _ => false
-       }
+        match self.token_type {
+            TokenType::PLUS | TokenType::MINUS | TokenType::MULTIPLY | TokenType::DIVIDE => true,
+            _ => false
+        }
     }
 
     fn precedence(&self) -> usize {
@@ -199,11 +198,18 @@ fn calculate(postfix: &Vec<Token>) -> f64 {
     todo!()
 }
 
-fn main() {
-    let input = "1 + 2 * (3 + 4) / 5"; // expected 1234+*5/+
-    let infix = tokenizer(input);
-    print_token_list(&infix);
-    let postfix = convert_infix_postfix(infix);
-    print_token_list(&postfix);
-    let result = calculate(&postfix);
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn it_works() {
+        let input = "1 + 2 * (3 + 4) / 5"; // expected 1234+*5/+
+        let infix = tokenizer(input);
+        print_token_list(&infix);
+        let postfix = convert_infix_postfix(infix);
+        print_token_list(&postfix);
+        let result = calculate(&postfix);
+        let result = 2 + 2;
+        assert_eq!(result, 4);
+    }
 }

@@ -3,5 +3,12 @@
 version = 3
 
 [[package]]
-name = "calculator"
+name = "calculator-engine"
 version = "0.1.0"
+
+[[package]]
+name = "calculator-service"
+version = "0.1.0"
+dependencies = [
+ "calculator-engine",
+]
