@@ -142,7 +142,7 @@ fn can_push_stack(token: &Token, stack: &Vec<&Token>) -> bool {
 //    return postfix
 // End
 
-fn convert_infix_postfix(infix: &Vec<Token>) -> Vec<&Token> {
+fn convert_infix_postfix(infix: Vec<Token>) -> Vec<Token> {
     let mut postfix = Vec::new();
     let mut stack = Vec::new();
     for token in infix {
@@ -152,10 +152,9 @@ fn convert_infix_postfix(infix: &Vec<Token>) -> Vec<&Token> {
             stack.push(token);
         } else if token.token_type == CloseParam {
             while stack.is_empty() == false {
-                let last = stack[stack.len() - 1];
+                let last = &stack[stack.len() - 1];
                 if last.token_type != TokenType::OpenParam {
-                    postfix.push(last);
-                    stack.pop();
+                    stack.pop().map(|t| postfix.push(t));
                 } else {
                     stack.pop();
                     break;
@@ -164,10 +163,9 @@ fn convert_infix_postfix(infix: &Vec<Token>) -> Vec<&Token> {
 
         } else {
             while stack.is_empty() == false {
-                let last = stack[stack.len() - 1];
+                let last = &stack[stack.len() - 1];
                 if last.precedence() >= token.precedence() {
-                    postfix.push(last);
-                    stack.pop();
+                    stack.pop().map(|t| postfix.push(t));
                 } else {
                     break;
                 }
@@ -176,18 +174,9 @@ fn convert_infix_postfix(infix: &Vec<Token>) -> Vec<&Token> {
         }
     }
     while stack.is_empty() == false {
-        let last = stack[stack.len() - 1];
-        postfix.push(last);
-        stack.pop();
+        stack.pop().map(|t| postfix.push(t));
     }
     postfix
-}
-
-fn print_token_ref_list(token_list: &Vec<&Token>) {
-    for token in token_list {
-        print!("{}", token.token)
-    }
-    println!()
 }
 
 fn print_token_list(token_list: &Vec<Token>) {
@@ -197,10 +186,15 @@ fn print_token_list(token_list: &Vec<Token>) {
     println!()
 }
 
+fn calculate(postfix: &Vec<&Token>) -> f64 {
+
+    todo!()
+}
+
 fn main() {
-    let input = "1 + 2 * (3 + 4) / 5";
+    let input = "1 + 2 * (3 + 4) / 5"; // expected 1234+*5/+
     let infix = tokenizer(input);
     print_token_list(&infix);
-    let postfix = convert_infix_postfix(&infix);
-    print_token_ref_list(&postfix);
+    let postfix = convert_infix_postfix(infix);
+    print_token_list(&postfix);
 }
