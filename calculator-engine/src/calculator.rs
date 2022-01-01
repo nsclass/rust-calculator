@@ -8,13 +8,13 @@ pub enum CalculateError {
     FailedCalculate(String),
     #[error("stack is empty for calculation")]
     StackEmptyCalculation,
-    #[error("token is not a digit")]
-    NotDigitValue,
+    #[error("token is not a number")]
+    NotNumber,
 }
 
 #[derive(PartialEq, Debug)]
 enum TokenType {
-    Digits,
+    Number,
     Plus,
     Minus,
     Multiply,
@@ -37,14 +37,14 @@ impl Token {
         }
     }
     fn is_operand(&self) -> bool {
-        self.token_type == TokenType::Digits
+        self.token_type == TokenType::Number
     }
 
     fn float(&self) -> Result<f64, CalculateError> {
-        return if self.token_type == TokenType::Digits {
+        return if self.token_type == TokenType::Number {
             self.token.parse().map_err(|e| CalculateError::ParseError(e))
         } else {
-            Err(CalculateError::NotDigitValue)
+            Err(CalculateError::NotNumber)
         };
     }
 
@@ -76,7 +76,7 @@ fn detect_digits(input: &Vec<char>, start: usize) -> (Token, usize) {
         last_idx += 1;
     }
 
-    (Token::new(digits, TokenType::Digits), last_idx)
+    (Token::new(digits, TokenType::Number), last_idx)
 }
 
 fn tokenizer(input: &str) -> Vec<Token> {
@@ -229,7 +229,7 @@ fn calculate(postfix: Vec<Token>) -> Result<f64, CalculateError> {
             let value1 = stack.pop().ok_or(CalculateError::StackEmptyCalculation)?;
             let value2 = stack.pop().ok_or(CalculateError::StackEmptyCalculation)?;
             let res = calculate_token(&token, &value2, &value1)?;
-            let created_token = Token::new(res.to_string(), TokenType::Digits);
+            let created_token = Token::new(res.to_string(), TokenType::Number);
             stack.push(created_token);
         }
     }
