@@ -14,11 +14,11 @@ pub enum CalculateError {
 
 #[derive(PartialEq, Debug)]
 enum TokenType {
-    DIGITS,
-    PLUS,
-    MINUS,
-    MULTIPLY,
-    DIVIDE,
+    Digits,
+    Plus,
+    Minus,
+    Multiply,
+    Divide,
     OpenParam,
     CloseParam,
 }
@@ -37,11 +37,11 @@ impl Token {
         }
     }
     fn is_operand(&self) -> bool {
-        self.token_type == TokenType::DIGITS
+        self.token_type == TokenType::Digits
     }
 
     fn float(&self) -> Result<f64, CalculateError> {
-        return if self.token_type == TokenType::DIGITS {
+        return if self.token_type == TokenType::Digits {
             self.token.parse().map_err(|e| CalculateError::ParseError(e))
         } else {
             Err(CalculateError::NotDigitValue)
@@ -50,15 +50,15 @@ impl Token {
 
     fn is_operator(&self) -> bool {
         match self.token_type {
-            TokenType::PLUS | TokenType::MINUS | TokenType::MULTIPLY | TokenType::DIVIDE => true,
+            TokenType::Plus | TokenType::Minus | TokenType::Multiply | TokenType::Divide => true,
             _ => false
         }
     }
 
     fn precedence(&self) -> usize {
         match self.token_type {
-            TokenType::PLUS | TokenType::MINUS => 1,
-            TokenType::MULTIPLY | TokenType::DIVIDE => 2,
+            TokenType::Plus | TokenType::Minus => 1,
+            TokenType::Multiply | TokenType::Divide => 2,
             _ => 0
         }
     }
@@ -76,7 +76,7 @@ fn detect_digits(input: &Vec<char>, start: usize) -> (Token, usize) {
         last_idx += 1;
     }
 
-    (Token::new(digits, TokenType::DIGITS), last_idx)
+    (Token::new(digits, TokenType::Digits), last_idx)
 }
 
 fn tokenizer(input: &str) -> Vec<Token> {
@@ -91,19 +91,19 @@ fn tokenizer(input: &str) -> Vec<Token> {
             idx = last_idx;
             token_list.push(token);
         } else if ch == '+' {
-            let token = Token::new("+".to_string(), TokenType::PLUS);
+            let token = Token::new("+".to_string(), TokenType::Plus);
             token_list.push(token);
             idx += 1;
         } else if ch == '-' {
-            let token = Token::new("-".to_string(), TokenType::MINUS);
+            let token = Token::new("-".to_string(), TokenType::Minus);
             token_list.push(token);
             idx += 1;
         } else if ch == '*' {
-            let token = Token::new("*".to_string(), TokenType::MULTIPLY);
+            let token = Token::new("*".to_string(), TokenType::Multiply);
             token_list.push(token);
             idx += 1;
         } else if ch == '/' {
-            let token = Token::new("/".to_string(), TokenType::DIVIDE);
+            let token = Token::new("/".to_string(), TokenType::Divide);
             token_list.push(token);
             idx += 1;
         } else if ch == '(' {
@@ -207,10 +207,10 @@ fn print_token_list(token_list: &Vec<Token>) {
 
 fn calculate_token(operator: &Token, value1: &Token, value2: &Token) -> Result<f64, CalculateError> {
     match &operator.token_type {
-        TokenType::PLUS => Ok(value1.float()? + value2.float()?),
-        TokenType::MINUS => Ok(value1.float()? - value2.float()?),
-        TokenType::MULTIPLY => Ok(value1.float()? * value2.float()?),
-        TokenType::DIVIDE => Ok(value1.float()? / value2.float()?),
+        TokenType::Plus => Ok(value1.float()? + value2.float()?),
+        TokenType::Minus => Ok(value1.float()? - value2.float()?),
+        TokenType::Multiply => Ok(value1.float()? * value2.float()?),
+        TokenType::Divide => Ok(value1.float()? / value2.float()?),
         _ => Err(CalculateError::FailedCalculate(format!("{} {} {}",
                                                          value1.token.to_string(),
                                                          operator.token.to_string(),
@@ -229,7 +229,7 @@ fn calculate(postfix: Vec<Token>) -> Result<f64, CalculateError> {
             let value1 = stack.pop().ok_or(CalculateError::StackEmptyCalculation)?;
             let value2 = stack.pop().ok_or(CalculateError::StackEmptyCalculation)?;
             let res = calculate_token(&token, &value2, &value1)?;
-            let created_token = Token::new(res.to_string(), TokenType::DIGITS);
+            let created_token = Token::new(res.to_string(), TokenType::Digits);
             stack.push(created_token);
         }
     }
