@@ -149,6 +149,7 @@ fn tokenizer(input: &str) -> Vec<Token> {
 //        return 0;
 //     }
 // }
+// verification: https://raj457036.github.io/Simple-Tools/prefixAndPostfixConvertor.html
 
 fn convert_infix_postfix(infix: Vec<Token>) -> Vec<Token> {
     let mut postfix = Vec::new();
@@ -194,7 +195,7 @@ fn print_token_list(token_list: &Vec<Token>) {
     println!()
 }
 
-fn calculate(postfix: &Vec<&Token>) -> f64 {
+fn calculate(postfix: &Vec<Token>) -> f64 {
     todo!()
 }
 
@@ -204,4 +205,5 @@ fn main() {
     print_token_list(&infix);
     let postfix = convert_infix_postfix(infix);
     print_token_list(&postfix);
+    let result = calculate(&postfix);
 }
