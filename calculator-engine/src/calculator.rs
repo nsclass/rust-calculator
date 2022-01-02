@@ -234,8 +234,7 @@ fn calculate(postfix: Vec<Token>) -> Result<f64, CalculateError> {
         }
     }
 
-    let res = stack.pop().map(|token| token.float()).ok_or(CalculateError::StackEmptyCalculation)?;
-    res
+    stack.pop().map(|token| token.float()).ok_or(CalculateError::StackEmptyCalculation)?
 }
 
 
