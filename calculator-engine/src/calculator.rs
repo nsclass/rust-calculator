@@ -31,10 +31,7 @@ struct Token {
 
 impl Token {
     fn new(token: String, token_type: TokenType) -> Self {
-        Self {
-            token,
-            token_type,
-        }
+        Self { token, token_type }
     }
     fn is_operand(&self) -> bool {
         self.token_type == TokenType::Number
@@ -42,7 +39,9 @@ impl Token {
 
     fn float(&self) -> Result<f64, CalculateError> {
         return if self.token_type == TokenType::Number {
-            self.token.parse().map_err(|e| CalculateError::ParseError(e))
+            self.token
+                .parse()
+                .map_err(|e| CalculateError::ParseError(e))
         } else {
             Err(CalculateError::NotNumber)
         };
@@ -51,7 +50,7 @@ impl Token {
     fn is_operator(&self) -> bool {
         match self.token_type {
             TokenType::Plus | TokenType::Minus | TokenType::Multiply | TokenType::Divide => true,
-            _ => false
+            _ => false,
         }
     }
 
@@ -59,7 +58,7 @@ impl Token {
         match self.token_type {
             TokenType::Plus | TokenType::Minus => 1,
             TokenType::Multiply | TokenType::Divide => 2,
-            _ => 0
+            _ => 0,
         }
     }
 }
@@ -205,17 +204,22 @@ fn print_token_list(token_list: &Vec<Token>) {
     println!()
 }
 
-fn calculate_token(operator: &Token, value1: &Token, value2: &Token) -> Result<f64, CalculateError> {
+fn calculate_token(
+    operator: &Token,
+    value1: &Token,
+    value2: &Token,
+) -> Result<f64, CalculateError> {
     match &operator.token_type {
         TokenType::Plus => Ok(value1.float()? + value2.float()?),
         TokenType::Minus => Ok(value1.float()? - value2.float()?),
         TokenType::Multiply => Ok(value1.float()? * value2.float()?),
         TokenType::Divide => Ok(value1.float()? / value2.float()?),
-        _ => Err(CalculateError::FailedCalculate(format!("{} {} {}",
-                                                         value1.token.to_string(),
-                                                         operator.token.to_string(),
-                                                         value2.token.to_string(),
-        )))
+        _ => Err(CalculateError::FailedCalculate(format!(
+            "{} {} {}",
+            value1.token.to_string(),
+            operator.token.to_string(),
+            value2.token.to_string(),
+        ))),
     }
 }
 
@@ -234,9 +238,11 @@ fn calculate(postfix: Vec<Token>) -> Result<f64, CalculateError> {
         }
     }
 
-    stack.pop().map(|token| token.float()).ok_or(CalculateError::StackEmptyCalculation)?
+    stack
+        .pop()
+        .map(|token| token.float())
+        .ok_or(CalculateError::StackEmptyCalculation)?
 }
-
 
 pub fn calculate_str(input: &str) -> Result<f64, CalculateError> {
     let infix = tokenizer(input);

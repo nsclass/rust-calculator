@@ -1,4 +1,3 @@
-
 use calculator_engine::calculate_str;
 
 fn main() {
@@ -6,6 +5,6 @@ fn main() {
     let result = calculate_str(input);
     match result {
         Ok(val) => println!("{} is {}", input, val),
-        Err(err) => println!("{}, error: {:?}", input, err)
+        Err(err) => println!("{}, error: {:?}", input, err),
     }
 }
