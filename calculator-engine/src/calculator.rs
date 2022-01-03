@@ -1,67 +1,5 @@
-use thiserror::Error;
-
-#[derive(Error, Debug)]
-pub enum CalculateError {
-    #[error("error on converting from a string to a float")]
-    ParseError(std::num::ParseFloatError),
-    #[error("failed to calculate the operator")]
-    FailedCalculate(String),
-    #[error("stack is empty for calculation")]
-    StackEmptyCalculation,
-    #[error("token is not a number")]
-    NotNumber,
-}
-
-#[derive(PartialEq, Debug)]
-enum TokenType {
-    Number,
-    Plus,
-    Minus,
-    Multiply,
-    Divide,
-    OpenParam,
-    CloseParam,
-}
-
-#[derive(Debug)]
-struct Token {
-    token: String,
-    token_type: TokenType,
-}
-
-impl Token {
-    fn new(token: String, token_type: TokenType) -> Self {
-        Self { token, token_type }
-    }
-    fn is_operand(&self) -> bool {
-        self.token_type == TokenType::Number
-    }
-
-    fn float(&self) -> Result<f64, CalculateError> {
-        return if self.token_type == TokenType::Number {
-            self.token
-                .parse()
-                .map_err(|e| CalculateError::ParseError(e))
-        } else {
-            Err(CalculateError::NotNumber)
-        };
-    }
-
-    fn is_operator(&self) -> bool {
-        match self.token_type {
-            TokenType::Plus | TokenType::Minus | TokenType::Multiply | TokenType::Divide => true,
-            _ => false,
-        }
-    }
-
-    fn precedence(&self) -> usize {
-        match self.token_type {
-            TokenType::Plus | TokenType::Minus => 1,
-            TokenType::Multiply | TokenType::Divide => 2,
-            _ => 0,
-        }
-    }
-}
+use crate::token::{CalculateError, Token, TokenType};
+use crate::{CalculationTrace, CalculationTraceDetails, PostFixConversionTrace};
 
 fn detect_digits(input: &Vec<char>, start: usize) -> (Token, usize) {
     let mut last_idx = start;
@@ -163,20 +101,25 @@ fn tokenizer(input: &str) -> Vec<Token> {
 // }
 // verification: https://raj457036.github.io/Simple-Tools/prefixAndPostfixConvertor.html
 
-fn convert_infix_postfix(infix: Vec<Token>) -> Vec<Token> {
+fn convert_infix_postfix(infix: Vec<Token>) -> (Vec<Token>, PostFixConversionTrace) {
     let mut postfix = Vec::new();
     let mut stack = Vec::new();
+    let mut trace = PostFixConversionTrace::new();
     for token in infix {
         if token.is_operand() {
             postfix.push(token);
+            trace.add_trace(&stack, &postfix);
         } else if token.token_type == TokenType::OpenParam {
             stack.push(token);
+            trace.add_trace(&stack, &postfix);
         } else if token.token_type == TokenType::CloseParam {
             while let Some(last) = stack.last() {
                 if last.token_type != TokenType::OpenParam {
                     stack.pop().map(|t| postfix.push(t));
+                    trace.add_trace(&stack, &postfix);
                 } else {
                     stack.pop();
+                    trace.add_trace(&stack, &postfix);
                     break;
                 }
             }
@@ -184,17 +127,21 @@ fn convert_infix_postfix(infix: Vec<Token>) -> Vec<Token> {
             while let Some(last) = stack.last() {
                 if last.precedence() >= token.precedence() {
                     stack.pop().map(|t| postfix.push(t));
+                    trace.add_trace(&stack, &postfix);
                 } else {
                     break;
                 }
             }
             stack.push(token);
+            trace.add_trace(&stack, &postfix);
         }
     }
     while stack.is_empty() == false {
         stack.pop().map(|t| postfix.push(t));
+        trace.add_trace(&stack, &postfix);
     }
-    postfix
+
+    (postfix, trace)
 }
 
 fn print_token_list(token_list: &Vec<Token>) {
@@ -223,33 +170,52 @@ fn calculate_token(
     }
 }
 
-fn calculate(postfix: Vec<Token>) -> Result<f64, CalculateError> {
+fn calculate(postfix: Vec<Token>) -> Result<(f64, CalculationTrace), CalculateError> {
     let mut stack = Vec::new();
+    let mut current: f64 = 0.;
+    let mut trace = CalculationTrace::new();
 
     for token in postfix {
         if token.is_operand() {
+            let clone_token = token.token.clone();
             stack.push(token);
+            trace.add_trace(&stack, clone_token, current);
         } else {
             let value1 = stack.pop().ok_or(CalculateError::StackEmptyCalculation)?;
             let value2 = stack.pop().ok_or(CalculateError::StackEmptyCalculation)?;
-            let res = calculate_token(&token, &value2, &value1)?;
-            let created_token = Token::new(res.to_string(), TokenType::Number);
+            current = calculate_token(&token, &value2, &value1)?;
+            let created_token = Token::new(current.to_string(), TokenType::Number);
             stack.push(created_token);
+            trace.add_trace(&stack, token.token.clone(), current);
         }
     }
 
-    stack
+    let res = stack
         .pop()
         .map(|token| token.float())
-        .ok_or(CalculateError::StackEmptyCalculation)?
+        .ok_or(CalculateError::StackEmptyCalculation)?;
+
+    res.map(|ans| (ans, trace))
 }
 
-pub fn calculate_str(input: &str) -> Result<f64, CalculateError> {
+pub fn calculate_str(input: &str) -> Result<(f64, CalculationTraceDetails), CalculateError> {
     let infix = tokenizer(input);
+    let infix_clone = infix.clone();
     print_token_list(&infix);
-    let postfix = convert_infix_postfix(infix);
+    let (postfix, _trace) = convert_infix_postfix(infix);
+    // let json = trace.to_json().map_err(|_| CalculateError::PostFixTraceError)?;
+    // println!("{}", json);
     print_token_list(&postfix);
-    calculate(postfix)
+    let postfix_clone = postfix.clone();
+    let (ans, _calc_trace) = calculate(postfix)?;
+    // let json = calc_trace.to_json().map_err(|_| CalculateError::CalculationTraceError)?;
+    // println!("{}", json);
+    let trace = CalculationTraceDetails::new(&infix_clone, &postfix_clone, trace, calc_trace);
+    let json = trace
+        .to_json()
+        .map_err(|_| CalculateError::CalculationTraceError)?;
+    println!("{}", json);
+    Ok((ans, trace))
 }
 
 #[cfg(test)]
@@ -259,7 +225,7 @@ mod tests {
     #[test]
     fn it_works() {
         let input = "1 + 2 * (3 + 4) / 2"; // expected 1234+*2/+
-        let result = calculate_str(input).unwrap();
+        let (result, trace) = calculate_str(input).unwrap();
         assert_eq!(result, 8.);
     }
 }
