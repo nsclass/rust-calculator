@@ -5,7 +5,7 @@ use crate::Token;
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PostTraceItem {
     stack: Vec<String>,
-    current: Vec<String>,
+    postfix: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -21,7 +21,7 @@ impl PostFixConversionTrace {
     pub(crate) fn add_trace(&mut self, stack: &Vec<Token>, current: &Vec<Token>) {
         let item = PostTraceItem {
             stack: to_string_vec_rev(stack),
-            current: to_string_vec(current),
+            postfix: to_string_vec(current),
         };
         self.trace.push(item);
     }
