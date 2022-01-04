@@ -261,6 +261,13 @@ mod tests {
     use super::*;
 
     #[test]
+    fn divide_by_zero() {
+        let input = "1/0";
+        let (result, _) = calculate_str(input, true).unwrap();
+        assert_eq!(result, f64::INFINITY);
+    }
+
+    #[test]
     fn it_works() {
         let input = "1 + 2 * (3 + 4) / 2"; // expected 1234+*2/+
         let (result, _trace_details) = calculate_str(input, true).unwrap();

@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, PartialEq)]
 pub enum CalculateError {
     #[error("error on converting from a string to a float")]
     ParseError(std::num::ParseFloatError),
