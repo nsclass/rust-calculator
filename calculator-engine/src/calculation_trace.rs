@@ -88,20 +88,6 @@ pub struct CalculationTraceDetails {
 }
 
 impl CalculationTraceDetails {
-    pub(crate) fn new(
-        infix: &Vec<Token>,
-        postfix: &Vec<Token>,
-        postfix_trace: PostFixConversionTrace,
-        calculation_trace: CalculationTrace,
-    ) -> Self {
-        Self {
-            infix: to_string_vec(infix),
-            postfix: to_string_vec(postfix),
-            postfix_trace,
-            calculation_trace,
-        }
-    }
-
     pub fn to_json(&self) -> serde_json::Result<String> {
         serde_json::to_string(self)
     }

@@ -236,7 +236,7 @@ pub fn calculate_str(
     let infix = tokenizer(input);
     print_token_list(&infix);
 
-    let mut tracer = if enable_trace {
+    let tracer = if enable_trace {
         Some(CalculationTracer::new())
     } else {
         None
@@ -263,7 +263,7 @@ mod tests {
     #[test]
     fn it_works() {
         let input = "1 + 2 * (3 + 4) / 2"; // expected 1234+*2/+
-        let (result, trace) = calculate_str(input, true).unwrap();
+        let (result, _trace_details) = calculate_str(input, true).unwrap();
         assert_eq!(result, 8.);
     }
 }
