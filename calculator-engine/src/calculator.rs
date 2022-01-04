@@ -1,5 +1,5 @@
 use crate::token::{CalculateError, Token, TokenType};
-use crate::{CalculationTrace, CalculationTraceDetails, PostFixConversionTrace};
+use crate::{CalculationTraceDetails, CalculationTracer};
 
 fn detect_digits(input: &Vec<char>, start: usize) -> (Token, usize) {
     let mut last_idx = start;
@@ -101,25 +101,40 @@ fn tokenizer(input: &str) -> Vec<Token> {
 // }
 // verification: https://raj457036.github.io/Simple-Tools/prefixAndPostfixConvertor.html
 
-fn convert_infix_postfix(infix: Vec<Token>) -> (Vec<Token>, PostFixConversionTrace) {
+fn convert_infix_postfix(
+    infix: Vec<Token>,
+    mut tracer: Option<CalculationTracer>,
+) -> (Vec<Token>, Option<CalculationTracer>) {
     let mut postfix = Vec::new();
     let mut stack = Vec::new();
-    let mut trace = PostFixConversionTrace::new();
+
+    if let Some(ref mut t) = tracer {
+        t.set_infix(&infix);
+    }
+
     for token in infix {
         if token.is_operand() {
             postfix.push(token);
-            trace.add_trace(&stack, &postfix);
+            if let Some(ref mut t) = tracer {
+                t.add_postfix_trace(&stack, &postfix);
+            }
         } else if token.token_type == TokenType::OpenParam {
             stack.push(token);
-            trace.add_trace(&stack, &postfix);
+            if let Some(ref mut t) = tracer {
+                t.add_postfix_trace(&stack, &postfix);
+            }
         } else if token.token_type == TokenType::CloseParam {
             while let Some(last) = stack.last() {
                 if last.token_type != TokenType::OpenParam {
                     stack.pop().map(|t| postfix.push(t));
-                    trace.add_trace(&stack, &postfix);
+                    if let Some(ref mut t) = tracer {
+                        t.add_postfix_trace(&stack, &postfix);
+                    }
                 } else {
                     stack.pop();
-                    trace.add_trace(&stack, &postfix);
+                    if let Some(ref mut t) = tracer {
+                        t.add_postfix_trace(&stack, &postfix);
+                    }
                     break;
                 }
             }
@@ -127,21 +142,27 @@ fn convert_infix_postfix(infix: Vec<Token>) -> (Vec<Token>, PostFixConversionTra
             while let Some(last) = stack.last() {
                 if last.precedence() >= token.precedence() {
                     stack.pop().map(|t| postfix.push(t));
-                    trace.add_trace(&stack, &postfix);
+                    if let Some(ref mut t) = tracer {
+                        t.add_postfix_trace(&stack, &postfix);
+                    }
                 } else {
                     break;
                 }
             }
             stack.push(token);
-            trace.add_trace(&stack, &postfix);
+            if let Some(ref mut t) = tracer {
+                t.add_postfix_trace(&stack, &postfix);
+            }
         }
     }
     while stack.is_empty() == false {
         stack.pop().map(|t| postfix.push(t));
-        trace.add_trace(&stack, &postfix);
+        if let Some(ref mut t) = tracer {
+            t.add_postfix_trace(&stack, &postfix);
+        }
     }
 
-    (postfix, trace)
+    (postfix, tracer)
 }
 
 fn print_token_list(token_list: &Vec<Token>) {
@@ -170,23 +191,33 @@ fn calculate_token(
     }
 }
 
-fn calculate(postfix: Vec<Token>) -> Result<(f64, CalculationTrace), CalculateError> {
+fn calculate(
+    postfix: Vec<Token>,
+    mut tracer: Option<CalculationTracer>,
+) -> Result<(f64, Option<CalculationTracer>), CalculateError> {
     let mut stack = Vec::new();
     let mut current: f64 = 0.;
-    let mut trace = CalculationTrace::new();
+
+    if let Some(ref mut t) = tracer {
+        t.set_postfix(&postfix);
+    }
 
     for token in postfix {
         if token.is_operand() {
             let clone_token = token.token.clone();
             stack.push(token);
-            trace.add_trace(&stack, clone_token, current);
+            if let Some(ref mut t) = tracer {
+                t.add_calculation_trace(&stack, clone_token, current);
+            }
         } else {
             let value1 = stack.pop().ok_or(CalculateError::StackEmptyCalculation)?;
             let value2 = stack.pop().ok_or(CalculateError::StackEmptyCalculation)?;
             current = calculate_token(&token, &value2, &value1)?;
             let created_token = Token::new(current.to_string(), TokenType::Number);
             stack.push(created_token);
-            trace.add_trace(&stack, token.token.clone(), current);
+            if let Some(ref mut t) = tracer {
+                t.add_calculation_trace(&stack, token.token.clone(), current);
+            }
         }
     }
 
@@ -195,27 +226,34 @@ fn calculate(postfix: Vec<Token>) -> Result<(f64, CalculationTrace), CalculateEr
         .map(|token| token.float())
         .ok_or(CalculateError::StackEmptyCalculation)?;
 
-    res.map(|ans| (ans, trace))
+    res.map(|ans| (ans, tracer))
 }
 
-pub fn calculate_str(input: &str) -> Result<(f64, CalculationTraceDetails), CalculateError> {
+pub fn calculate_str(
+    input: &str,
+    enable_trace: bool,
+) -> Result<(f64, Option<CalculationTraceDetails>), CalculateError> {
     let infix = tokenizer(input);
-    let infix_clone = infix.clone();
     print_token_list(&infix);
-    let (postfix, _trace) = convert_infix_postfix(infix);
-    // let json = trace.to_json().map_err(|_| CalculateError::PostFixTraceError)?;
-    // println!("{}", json);
+
+    let mut tracer = if enable_trace {
+        Some(CalculationTracer::new())
+    } else {
+        None
+    };
+
+    let (postfix, tracer) = convert_infix_postfix(infix, tracer);
     print_token_list(&postfix);
-    let postfix_clone = postfix.clone();
-    let (ans, _calc_trace) = calculate(postfix)?;
-    // let json = calc_trace.to_json().map_err(|_| CalculateError::CalculationTraceError)?;
-    // println!("{}", json);
-    let trace = CalculationTraceDetails::new(&infix_clone, &postfix_clone, trace, calc_trace);
-    let json = trace
-        .to_json()
-        .map_err(|_| CalculateError::CalculationTraceError)?;
-    println!("{}", json);
-    Ok((ans, trace))
+    let (ans, tracer) = calculate(postfix, tracer)?;
+    if let Some(ref tracer) = tracer {
+        let details = tracer.trace_details();
+        let json =
+            serde_json::to_string(&details).map_err(|_| CalculateError::CalculationTraceError)?;
+        println!("{}", json);
+        return Ok((ans, Some(details)));
+    }
+
+    Ok((ans, None))
 }
 
 #[cfg(test)]
@@ -225,7 +263,7 @@ mod tests {
     #[test]
     fn it_works() {
         let input = "1 + 2 * (3 + 4) / 2"; // expected 1234+*2/+
-        let (result, trace) = calculate_str(input).unwrap();
+        let (result, trace) = calculate_str(input, true).unwrap();
         assert_eq!(result, 8.);
     }
 }

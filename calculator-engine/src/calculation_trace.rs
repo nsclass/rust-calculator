@@ -106,3 +106,51 @@ impl CalculationTraceDetails {
         serde_json::to_string(self)
     }
 }
+
+pub struct CalculationTracer {
+    infix: Vec<String>,
+    postfix: Vec<String>,
+    postfix_trace: PostFixConversionTrace,
+    calculation_trace: CalculationTrace,
+}
+
+impl CalculationTracer {
+    pub fn new() -> Self {
+        Self {
+            infix: Vec::new(),
+            postfix: Vec::new(),
+            postfix_trace: PostFixConversionTrace::new(),
+            calculation_trace: CalculationTrace::new(),
+        }
+    }
+
+    pub(crate) fn set_postfix(&mut self, postfix: &Vec<Token>) {
+        self.postfix = to_string_vec(postfix);
+    }
+
+    pub(crate) fn set_infix(&mut self, infix: &Vec<Token>) {
+        self.infix = to_string_vec(infix);
+    }
+
+    pub(crate) fn add_postfix_trace(&mut self, stack: &Vec<Token>, current: &Vec<Token>) {
+        self.postfix_trace.add_trace(stack, current);
+    }
+
+    pub(crate) fn add_calculation_trace(&mut self, stack: &Vec<Token>, token: String, answer: f64) {
+        self.calculation_trace.add_trace(stack, token, answer);
+    }
+
+    pub fn trace_details(&self) -> CalculationTraceDetails {
+        CalculationTraceDetails {
+            infix: self.infix.clone(),
+            postfix: self.postfix.clone(),
+            postfix_trace: self.postfix_trace.clone(),
+            calculation_trace: self.calculation_trace.clone(),
+        }
+    }
+
+    pub fn to_json(&self) -> serde_json::Result<String> {
+        let details = self.trace_details();
+        serde_json::to_string(&details)
+    }
+}
