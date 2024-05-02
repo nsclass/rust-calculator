@@ -259,6 +259,8 @@ pub fn calculate_str(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use assert_json_diff::assert_json_include;
+    use serde_json::json;
 
     #[test]
     fn divide_by_zero() {
@@ -270,7 +272,24 @@ mod tests {
     #[test]
     fn it_works() {
         let input = "1 + 2 * (3 + 4) / 2"; // expected 1234+*2/+
-        let (result, _trace_details) = calculate_str(input, true).unwrap();
+        let (result, trace_details) = calculate_str(input, true).unwrap();
         assert_eq!(result, 8.);
+        let res: serde_json::Value = trace_details.unwrap().to_json().unwrap().parse().unwrap();
+        assert_json_include!(
+            actual: res,
+            expected: json!({
+              "postfix": [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "+",
+                    "*",
+                    "2",
+                    "/",
+                    "+"
+              ]
+           })
+        )
     }
 }
