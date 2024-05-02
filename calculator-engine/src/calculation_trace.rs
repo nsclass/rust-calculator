@@ -93,6 +93,7 @@ impl CalculationTraceDetails {
     }
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CalculationTracer {
     infix: Vec<String>,
     postfix: Vec<String>,

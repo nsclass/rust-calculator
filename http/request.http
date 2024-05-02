@@ -1,0 +1,8 @@
+### Calculate
+
+POST http://localhost:3000/calculate
+Content-Type: application/json
+
+{
+  "infix": "1 + 2"
+}
