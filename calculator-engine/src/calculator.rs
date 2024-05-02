@@ -278,17 +278,7 @@ mod tests {
         assert_json_include!(
             actual: res,
             expected: json!({
-              "postfix": [
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "+",
-                    "*",
-                    "2",
-                    "/",
-                    "+"
-              ]
+              "postfix": [ "1", "2", "3", "4", "+", "*", "2", "/", "+" ]
            })
         )
     }
