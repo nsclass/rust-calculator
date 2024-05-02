@@ -1,4 +1,4 @@
-# Rust Simple Text Calculator # ![tests](https://github.com/nsclass/rust-calculator/workflows/tests/badge.svg)
+# Rust Simple Text Calculator # ![tests](https://github.com/nsclass/rust-calculator/workflows/Rust/badge.svg)
 
 Simple calculator by using post fix algorithm in Rust
 
