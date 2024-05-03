@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::Json;
-use calculator_engine::{calculate_str, CalculationTraceDetails};
+use calculator_engine::calculate_str;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 

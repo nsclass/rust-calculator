@@ -51,12 +51,12 @@ impl Token {
         };
     }
 
-    pub(crate) fn is_operator(&self) -> bool {
-        match self.token_type {
-            TokenType::Plus | TokenType::Minus | TokenType::Multiply | TokenType::Divide => true,
-            _ => false,
-        }
-    }
+    // pub(crate) fn is_operator(&self) -> bool {
+    //     match self.token_type {
+    //         TokenType::Plus | TokenType::Minus | TokenType::Multiply | TokenType::Divide => true,
+    //         _ => false,
+    //     }
+    // }
 
     pub(crate) fn precedence(&self) -> usize {
         match self.token_type {
