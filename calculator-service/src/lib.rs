@@ -2,7 +2,7 @@ use axum::routing::post;
 use axum::serve::Serve;
 use axum::Router;
 
-mod router;
+pub mod router;
 use router::calculation::calculation;
 
 pub mod config;
