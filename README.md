@@ -1,11 +1,19 @@
 # Rust Simple Text Calculator ![tests](https://github.com/nsclass/rust-calculator/workflows/Rust/badge.svg)
 
-Simple calculator by using post fix algorithm in Rust
+Simple calculator application by using post fix algorithm in Rust
 
-## Examples
+### Backend
+Axum framework used for HTTP server
 
-```rust
-let input = "1 + 2 * (3 + 4) / 2"; // expected 1234+*2/+
-let (result, _trace_details) = calculate_str(input, true).unwrap();
-assert_eq!(result, 8.);
+#### API
+
+- Calculation
+
+```http request
+POST http://localhost:3000/calculation
+Content-Type: application/json
+
+{
+  "infix": "1 + 2 * (3 + 4) / 2"
+}
 ```
