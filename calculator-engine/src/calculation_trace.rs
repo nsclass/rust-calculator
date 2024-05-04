@@ -1,3 +1,4 @@
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 use crate::Token;
@@ -51,7 +52,7 @@ fn to_string_vec_rev(vec: &Vec<Token>) -> Vec<String> {
 pub struct CalculationTraceItem {
     stack: Vec<String>,
     token: String,
-    answer: f64,
+    answer: Decimal,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -64,7 +65,7 @@ impl CalculationTrace {
         Self { trace: Vec::new() }
     }
 
-    pub(crate) fn add_trace(&mut self, stack: &Vec<Token>, token: String, answer: f64) {
+    pub(crate) fn add_trace(&mut self, stack: &Vec<Token>, token: String, answer: Decimal) {
         let item = CalculationTraceItem {
             stack: to_string_vec_rev(stack),
             token,
@@ -123,7 +124,12 @@ impl CalculationTracer {
         self.postfix_trace.add_trace(stack, current);
     }
 
-    pub(crate) fn add_calculation_trace(&mut self, stack: &Vec<Token>, token: String, answer: f64) {
+    pub(crate) fn add_calculation_trace(
+        &mut self,
+        stack: &Vec<Token>,
+        token: String,
+        answer: Decimal,
+    ) {
         self.calculation_trace.add_trace(stack, token, answer);
     }
 

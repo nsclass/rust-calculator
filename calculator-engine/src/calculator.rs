@@ -1,11 +1,13 @@
 use crate::token::{CalculateError, Token, TokenType};
 use crate::{CalculationTraceDetails, CalculationTracer};
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 
 fn detect_digits(input: &Vec<char>, start: usize) -> (Token, usize) {
     let mut last_idx = start;
     let mut digits = String::new();
     while last_idx < input.len() {
-        if input[last_idx].is_digit(10) {
+        if input[last_idx].is_digit(10) || input[last_idx] == '.' {
             digits.push(input[last_idx]);
         } else {
             break;
@@ -176,12 +178,18 @@ fn calculate_token(
     operator: &Token,
     value1: &Token,
     value2: &Token,
-) -> Result<f64, CalculateError> {
+) -> Result<Decimal, CalculateError> {
     match &operator.token_type {
-        TokenType::Plus => Ok(value1.float()? + value2.float()?),
-        TokenType::Minus => Ok(value1.float()? - value2.float()?),
-        TokenType::Multiply => Ok(value1.float()? * value2.float()?),
-        TokenType::Divide => Ok(value1.float()? / value2.float()?),
+        TokenType::Plus => Ok(value1.decimal()? + value2.decimal()?),
+        TokenType::Minus => Ok(value1.decimal()? - value2.decimal()?),
+        TokenType::Multiply => Ok(value1.decimal()? * value2.decimal()?),
+        TokenType::Divide => {
+            let v2 = value2.decimal();
+            if v2? == dec!(0) {
+                return Err(CalculateError::DivideByZero);
+            }
+            Ok(value1.decimal()? / value2.decimal()?)
+        }
         _ => Err(CalculateError::FailedCalculate(format!(
             "{} {} {}",
             value1.token.to_string(),
@@ -194,9 +202,9 @@ fn calculate_token(
 fn calculate(
     postfix: Vec<Token>,
     mut tracer: Option<CalculationTracer>,
-) -> Result<(f64, Option<CalculationTracer>), CalculateError> {
+) -> Result<(Decimal, Option<CalculationTracer>), CalculateError> {
     let mut stack = Vec::new();
-    let mut current: f64 = 0.;
+    let mut current: Decimal = dec!(0.);
 
     if let Some(ref mut t) = tracer {
         t.set_postfix(&postfix);
@@ -223,7 +231,7 @@ fn calculate(
 
     let res = stack
         .pop()
-        .map(|token| token.float())
+        .map(|token| token.decimal())
         .ok_or(CalculateError::StackEmptyCalculation)?;
 
     res.map(|ans| (ans, tracer))
@@ -232,7 +240,7 @@ fn calculate(
 pub fn calculate_str(
     input: &str,
     enable_trace: bool,
-) -> Result<(f64, Option<CalculationTraceDetails>), CalculateError> {
+) -> Result<(Decimal, Option<CalculationTraceDetails>), CalculateError> {
     let infix = tokenizer(input);
     print_token_list(&infix);
 
@@ -265,15 +273,15 @@ mod tests {
     #[test]
     fn divide_by_zero() {
         let input = "1/0";
-        let (result, _) = calculate_str(input, true).unwrap();
-        assert_eq!(result, f64::INFINITY);
+        let result = calculate_str(input, true);
+        assert_eq!(result.err().unwrap(), CalculateError::DivideByZero);
     }
 
     #[test]
-    fn it_works() {
+    fn basic_calculation() {
         let input = "1 + 2 * (3 + 4) / 2"; // expected 1234+*2/+
         let (result, trace_details) = calculate_str(input, true).unwrap();
-        assert_eq!(result, 8.);
+        assert_eq!(result, dec!(8.));
         let res: serde_json::Value = trace_details.unwrap().to_json().unwrap().parse().unwrap();
         assert_json_include!(
             actual: res,
@@ -281,5 +289,22 @@ mod tests {
               "postfix": [ "1", "2", "3", "4", "+", "*", "2", "/", "+" ]
            })
         )
+    }
+    #[test]
+    fn calculate_with_float_number() {
+        let input = "1.01 + 2.01"; // expected 1234+*2/+
+        let (result, trace_details) = calculate_str(input, true).unwrap();
+        assert_eq!(result, dec!(3.02));
+    }
+
+    #[test]
+    fn tokenizer_dot_digit() {
+        let input = "12.001";
+        let tokens = tokenizer(&input);
+        assert_eq!(tokens.len(), 1);
+        for token in tokens {
+            assert_eq!(token.token, "12.001");
+            assert_eq!(token.token_type, TokenType::Number);
+        }
     }
 }

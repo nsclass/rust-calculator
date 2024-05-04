@@ -1,9 +1,13 @@
+use rust_decimal::prelude::*;
+use rust_decimal::Decimal;
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq)]
 pub enum CalculateError {
-    #[error("error on converting from a string to a float")]
-    ParseError(std::num::ParseFloatError),
+    #[error("divide by zero")]
+    DivideByZero,
+    #[error("error on converting from a string to a decimal")]
+    ParseError(rust_decimal::Error),
     #[error("failed to calculate the operator")]
     FailedCalculate(String),
     #[error("stack is empty for calculation")]
@@ -41,11 +45,9 @@ impl Token {
         self.token_type == TokenType::Number
     }
 
-    pub(crate) fn float(&self) -> Result<f64, CalculateError> {
+    pub(crate) fn decimal(&self) -> Result<Decimal, CalculateError> {
         return if self.token_type == TokenType::Number {
-            self.token
-                .parse()
-                .map_err(|e| CalculateError::ParseError(e))
+            Decimal::from_str(&self.token).map_err(|e| CalculateError::ParseError(e))
         } else {
             Err(CalculateError::NotNumber)
         };
