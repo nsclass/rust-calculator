@@ -17,3 +17,7 @@ Content-Type: application/json
   "infix": "1 + 2 * (3 + 4) / 2"
 }
 ```
+### Frontend
+
+Frontend application is developed with vite, react and tailwind css
+
