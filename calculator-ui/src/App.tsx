@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useCallback, useState} from "react";
 
 const DisplayCalculation = ({calculationResult} : { calculationResult: any}) => {
   return (
@@ -15,7 +15,7 @@ const CalculateText = () => {
   const [calculateText, setCalculateText] = useState<string>("1+2")
   const [calculationResult, setCalculationResult] = useState()
 
-  const calculateRequest = async () => {
+  const calculateRequest = useCallback(async () => {
 
     const payload = {
       infix: calculateText
@@ -31,7 +31,7 @@ const CalculateText = () => {
     })
     const result = await response.json()
     setCalculationResult(result)
-  }
+  }, [calculateText])
 
   return (
     <div className="mt-10 w-2/3 h-auto">
