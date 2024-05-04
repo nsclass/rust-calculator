@@ -1,6 +1,6 @@
 # Rust Simple Text Calculator ![tests](https://github.com/nsclass/rust-calculator/workflows/Rust/badge.svg)
 
-Simple calculator application by using post fix algorithm in Rust
+Simple calculator application by using post fix algorithm in Rust. It supports operators: +, -, * and /
 
 ### Backend
 Axum framework used for HTTP server
