@@ -36,10 +36,13 @@ const CalculateText = () => {
   return (
     <div className="mt-10 w-2/3 h-auto">
       <div className="flex w-full h-10">
-        <input className="border-2 rounded-l-2xl w-full h-full text-center" type="text" placeholder="1 + 2"
+        <input className="border-2 rounded-l-2xl w-full h-full text-center"
+               type="text"
+               placeholder="1 + 2"
                value={calculateText}
                onChange={e => setCalculateText(e.target.value)}/>
-        <button className="border-2 rounded-r-2xl" onClick={calculateRequest}>Calculate</button>
+        <button className="border-2 rounded-r-2xl bg-blue-800 text-white pl-2 pr-4 hover:border-blue-950"
+                onClick={calculateRequest}>Calculate</button>
       </div>
       <DisplayCalculation calculationResult={calculationResult} />
     </div>
