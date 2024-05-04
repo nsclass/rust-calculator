@@ -13,7 +13,7 @@ Axum framework used for HTTP server
 - Calculation
 
 ```http request
-POST http://localhost:3000/calculation
+POST http://localhost:3000/calculate
 Content-Type: application/json
 
 {
@@ -22,5 +22,5 @@ Content-Type: application/json
 ```
 ### Frontend
 
-Frontend application is developed with vite, react and tailwind css
+Frontend application is developed with Vite for bundler, React for JS framework and Tailwind for CSS
 
