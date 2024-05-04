@@ -6,6 +6,13 @@ use rust_decimal_macros::dec;
 fn detect_digits(input: &Vec<char>, start: usize) -> (Token, usize) {
     let mut last_idx = start;
     let mut digits = String::new();
+
+    // handle if the first char is minus
+    if input[start] == '-' {
+        digits.push(input[last_idx]);
+        last_idx += 1;
+    }
+
     while last_idx < input.len() {
         if input[last_idx].is_digit(10) || input[last_idx] == '.' {
             digits.push(input[last_idx]);
@@ -22,6 +29,7 @@ fn tokenizer(input: &str) -> Vec<Token> {
     let mut token_list = Vec::new();
     let char_vec: Vec<char> = input.chars().collect();
     let mut idx = 0;
+    let mut prev_token = None;
 
     while idx < char_vec.len() {
         let ch = char_vec[idx];
@@ -29,30 +37,48 @@ fn tokenizer(input: &str) -> Vec<Token> {
             let (token, last_idx) = detect_digits(&char_vec, idx);
             idx = last_idx;
             token_list.push(token);
+            prev_token = Some(TokenType::Number);
         } else if ch == '+' {
             let token = Token::new("+".to_string(), TokenType::Plus);
             token_list.push(token);
             idx += 1;
+            prev_token = Some(TokenType::Plus);
         } else if ch == '-' {
-            let token = Token::new("-".to_string(), TokenType::Minus);
-            token_list.push(token);
-            idx += 1;
+            let mut is_number = true;
+            if let Some(token_type) = prev_token {
+                is_number = token_type != TokenType::Number
+            }
+            if is_number {
+                let (token, last_idx) = detect_digits(&char_vec, idx);
+                idx = last_idx;
+                token_list.push(token);
+                prev_token = Some(TokenType::Number);
+            } else {
+                let token = Token::new("-".to_string(), TokenType::Minus);
+                token_list.push(token);
+                idx += 1;
+                prev_token = Some(TokenType::Minus);
+            }
         } else if ch == '*' {
             let token = Token::new("*".to_string(), TokenType::Multiply);
             token_list.push(token);
             idx += 1;
+            prev_token = Some(TokenType::Multiply);
         } else if ch == '/' {
             let token = Token::new("/".to_string(), TokenType::Divide);
             token_list.push(token);
             idx += 1;
+            prev_token = Some(TokenType::Divide);
         } else if ch == '(' {
             let token = Token::new("(".to_string(), TokenType::OpenParam);
             token_list.push(token);
             idx += 1;
+            prev_token = Some(TokenType::OpenParam);
         } else if ch == ')' {
             let token = Token::new(")".to_string(), TokenType::CloseParam);
             token_list.push(token);
             idx += 1;
+            prev_token = Some(TokenType::CloseParam);
         } else {
             idx += 1;
         }
@@ -293,7 +319,7 @@ mod tests {
     #[test]
     fn calculate_with_float_number() {
         let input = "1.01 + 2.01"; // expected 1234+*2/+
-        let (result, trace_details) = calculate_str(input, true).unwrap();
+        let (result, _) = calculate_str(input, true).unwrap();
         assert_eq!(result, dec!(3.02));
     }
 
@@ -306,5 +332,34 @@ mod tests {
             assert_eq!(token.token, "12.001");
             assert_eq!(token.token_type, TokenType::Number);
         }
+    }
+
+    #[test]
+    fn detect_minus_number() {
+        let input = "-1";
+        let tokens = tokenizer(&input);
+        assert_eq!(tokens.len(), 1);
+        for token in tokens {
+            assert_eq!(token.token_type, TokenType::Number);
+        }
+    }
+
+    #[test]
+    fn detect_minus_number_in_expression() {
+        let input = "3 + -1";
+        let tokens = tokenizer(&input);
+        assert_eq!(tokens.len(), 3);
+        assert_eq!(tokens[2].token, "-1");
+        assert_eq!(tokens[2].token_type, TokenType::Number);
+    }
+
+    #[test]
+    fn calculate_with_minus_number() {
+        let mut input = "3 + -1";
+        let (result, _) = calculate_str(input, true).unwrap();
+        assert_eq!(result, dec!(2));
+        input = "30 * (-2 / 5) + 1";
+        let (result, _) = calculate_str(input, true).unwrap();
+        assert_eq!(result, dec!(-11));
     }
 }
