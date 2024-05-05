@@ -1,9 +1,19 @@
 import { useCallback, useState } from "react";
 
+type CalculationResult = {
+  result: string;
+  status: string;
+  trace: {
+    calculation_trace: Record<string, unknown>;
+    infix: string[];
+    postfix: string[];
+  };
+};
+
 const DisplayCalculation = ({
   calculationResult,
 }: {
-  calculationResult: any;
+  calculationResult?: CalculationResult;
 }) => {
   const [showTrace, setShowTrace] = useState(false);
   const toggleTrace = useCallback(() => {
@@ -14,7 +24,7 @@ const DisplayCalculation = ({
       <div className="mt-1 mb-1 h-10 content-center rounded-r rounded-l bg-green-700 text-center text-xl text-white">{`Answer: ${calculationResult?.result ?? ""}`}</div>
       <textarea
         className="h-10 w-full border-2"
-        value={calculationResult?.trace?.postfix.join(" ")}
+        value={calculationResult?.trace?.postfix?.join(" ")}
       />
       <button className="h-10 w-full border-2 bg-blue-50" onClick={toggleTrace}>
         {showTrace ? "Hide Trace" : "Show Trace"}
@@ -31,7 +41,8 @@ const DisplayCalculation = ({
 
 const CalculateText = () => {
   const [calculateText, setCalculateText] = useState<string>("1+2");
-  const [calculationResult, setCalculationResult] = useState();
+  const [calculationResult, setCalculationResult] =
+    useState<CalculationResult>();
 
   const calculateRequest = useCallback(async () => {
     const payload = {
