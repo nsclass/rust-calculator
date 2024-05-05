@@ -338,6 +338,7 @@ mod tests {
     fn detect_minus_number() {
         let input = "-1";
         let tokens = tokenizer(&input);
+        eprintln!("{tokens:?}");
         assert_eq!(tokens.len(), 1);
         for token in tokens {
             assert_eq!(token.token_type, TokenType::Number);
