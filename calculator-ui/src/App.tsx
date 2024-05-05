@@ -21,7 +21,7 @@ const DisplayCalculation = ({
   }, [showTrace]);
   return (
     <div className="flex h-auto w-full flex-col">
-      <div className="mt-1 mb-1 h-10 content-center rounded-r rounded-l bg-green-700 text-center text-xl text-white">{`Answer: ${calculationResult?.result ?? ""}`}</div>
+      <div className="mt-1 mb-1 h-10 content-center rounded-r rounded-l bg-green-700/75 text-center text-xl text-white">{`Answer: ${calculationResult?.result ?? ""}`}</div>
       <textarea
         className="h-10 w-full border-2"
         value={calculationResult?.trace?.postfix?.join(" ")}
@@ -72,7 +72,7 @@ const CalculateText = () => {
           onChange={(e) => setCalculateText(e.target.value)}
         />
         <button
-          className="rounded-r-2xl border-2 bg-blue-800 pr-4 pl-2 text-white hover:border-blue-950"
+          className="rounded-r-2xl border-2 bg-sky-600 pr-4 pl-2 text-white hover:border-blue-950"
           onClick={calculateRequest}
         >
           Calculate
