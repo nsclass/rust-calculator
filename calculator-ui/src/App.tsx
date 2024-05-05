@@ -23,7 +23,7 @@ const DisplayCalculation = ({
     <div className="flex h-auto w-full flex-col">
       <div className="mt-1 mb-1 h-10 content-center rounded-r rounded-l bg-green-700/75 text-center text-xl text-white">{`Answer: ${calculationResult?.result ?? ""}`}</div>
       <textarea
-        className="h-10 w-full border-2"
+        className="h-10 w-full border-2 content-center"
         value={calculationResult?.trace?.postfix?.join(" ")}
       />
       <button className="h-10 w-full border-2 bg-blue-50" onClick={toggleTrace}>
