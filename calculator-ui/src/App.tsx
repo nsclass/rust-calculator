@@ -1,12 +1,22 @@
 import {useCallback, useState} from "react";
 
 const DisplayCalculation = ({calculationResult} : { calculationResult: any}) => {
+  const [showTrace, setShowTrace] = useState(false)
+  const toggleTrace = useCallback(() => {
+    setShowTrace(!showTrace)
+  }, [showTrace])
   return (
     <div className="flex flex-col w-full h-auto">
-      <label className="h-10">{`Result: ${calculationResult?.result ?? ""}`}</label>
-        <textarea className="border-2 w-full h-screen "
-                  value={JSON.stringify(calculationResult, null, 2)}
-        />
+      <div
+        className="rounded-l rounded-r mt-1 mb-1 h-10 bg-green-700 text-white text-center content-center text-xl">{`Answer: ${calculationResult?.result ?? ""}`}</div>
+      <textarea className="border-2 w-full h-10 "
+                value={calculationResult?.trace?.postfix.join(" ")}
+      />
+      <button className="w-full h-10 border-2 bg-blue-50" onClick={toggleTrace}>{showTrace ? "Hide Trace" : "Show Trace"}</button>
+      {
+        showTrace && <textarea className="border-2 w-full h-screen"
+                value={JSON.stringify(calculationResult, null, 2)}
+      />}
     </div>
   )
 }
