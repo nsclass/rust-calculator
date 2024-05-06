@@ -6,6 +6,7 @@ use tower_http::{
     services::{ServeDir, ServeFile},
     trace::TraceLayer,
 };
+use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::fmt::format;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -17,12 +18,15 @@ pub mod config;
 use crate::config::AppConfig;
 
 pub async fn app_run(config: AppConfig) -> eyre::Result<Serve<Router, Router>, std::io::Error> {
+    let formatting_layer = BunyanFormattingLayer::new("calculator".to_string(), std::io::stdout);
+
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "calculator_service=debug,tower_http=trace".into()),
         )
-        .with(tracing_subscriber::fmt::layer())
+        .with(JsonStorageLayer)
+        .with(formatting_layer)
         .init();
 
     let index_file = format!("{}/index.html", config.static_dir);
