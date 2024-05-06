@@ -9,6 +9,7 @@ async fn calculation_api_test() {
     let config = AppConfig {
         host: "0.0.0.0".to_string(),
         port: 3031,
+        static_dir: "calculator-ui/dist".to_string(),
     };
 
     let serve = app_run(config.clone()).await.unwrap();

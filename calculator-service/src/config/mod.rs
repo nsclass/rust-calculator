@@ -7,6 +7,7 @@ use serde::Deserialize;
 pub struct AppConfig {
     pub host: String,
     pub port: i32,
+    pub static_dir: String,
 }
 
 impl AppConfig {
@@ -26,8 +27,11 @@ impl From<config::Config> for AppConfig {
         Self {
             host: c
                 .get_string("HOST")
-                .unwrap_or_else(|_| "0.0.0.0".to_string()),
+                .unwrap_or_else(|_| "localhost".to_string()),
             port: c.get::<i32>("PORT").unwrap_or_else(|_| 3000),
+            static_dir: c
+                .get_string("STATIC_DIR")
+                .unwrap_or_else(|_| "calculator-ui/dist".to_string()),
         }
     }
 }
