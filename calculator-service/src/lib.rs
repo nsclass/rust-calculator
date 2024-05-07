@@ -35,7 +35,7 @@ pub async fn app_run(config: AppConfig) -> eyre::Result<Serve<Router, Router>, s
 
     let router = Router::new()
         .route("/calculate", post(calculation))
-        .route_service("/", serve_dir);
+        .nest_service("/", serve_dir);
 
     let router = router.layer(TraceLayer::new_for_http());
 
