@@ -8,7 +8,7 @@ Main purpose of this project is to show how to use Axum Rust web framework for b
 ### Backend
 Axum framework used for HTTP server
 
-#### API
+#### REST API
 
 - Calculation
 
@@ -20,7 +20,8 @@ Content-Type: application/json
   "infix": "1 + 2 * (3 + 4) / 2"
 }
 ```
+
 ### Frontend
 
-Frontend application is developed with Vite for bundler, React for JS framework and Tailwind for CSS
+Frontend application is developed with TypeScript, ReactJS and Tailwind with Vite
 
