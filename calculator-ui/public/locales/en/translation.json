@@ -1,0 +1,9 @@
+{
+  "calculator": {
+    "title": "Rust Calculator",
+    "answer": "Answer",
+    "showTrace": "Show Trace",
+    "hideTrace": "Hide Trace",
+    "date": "{{date, DATE_HUGE}}"
+  }
+}
