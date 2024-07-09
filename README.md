@@ -25,3 +25,5 @@ Content-Type: application/json
 
 Frontend application is developed with TypeScript, ReactJS and Tailwind with Vite
 
+- Supporting internationalization(English, Korean)
+
