@@ -47,6 +47,8 @@ export const CalculateView = () => {
   const [calculationResult, setCalculationResult] =
     useState<CalculationResponse>();
 
+  const { t } = useTranslation();
+
   const calculateRequest = useCallback(async () => {
     const payload = {
       infix: calculateText,
@@ -75,10 +77,10 @@ export const CalculateView = () => {
           onChange={(e) => setCalculateText(e.target.value)}
         />
         <button
-          className="rounded-r-2xl border-2 bg-sky-600 pr-4 pl-2 text-white hover:border-blue-950"
+          className="rounded-r-2xl border-2 bg-sky-600 pr-4 pl-2 w-40 text-white hover:border-blue-950"
           onClick={calculateRequest}
         >
-          Calculate
+          {t('calculator.calculate')}
         </button>
       </div>
       <DisplayCalculation calculationResult={calculationResult} />

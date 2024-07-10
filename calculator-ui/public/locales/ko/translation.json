@@ -4,6 +4,7 @@
     "answer": "정답",
     "showTrace": "계산 상세 보기",
     "hideTrace": "계산 상세 감추기",
+    "calculate": "계산",
     "date": "{{date, DATE_HUGE}}"
   }
 }

@@ -4,6 +4,7 @@
     "answer": "Answer",
     "showTrace": "Show Trace",
     "hideTrace": "Hide Trace",
+    "calculate": "Calculate",
     "date": "{{date, DATE_HUGE}}"
   }
 }

@@ -10,21 +10,18 @@ import {
 } from "@nextui-org/react";
 import React from "react";
 
-type Item = {
+type LangType = {
   key: string;
   label: string;
 };
 
-const items: Item[] = [
+const items: LangType[] = [
   { key: "en", label: "English" },
   { key: "ko", label: "한국어" },
 ];
 
 export const LangSelector = () => {
-  const [selected, setSelected] = React.useState<Item>({
-    key: "en",
-    label: "English",
-  });
+  const [selected, setSelected] = React.useState<LangType>(items[0]);
 
   return (
     <Dropdown>
