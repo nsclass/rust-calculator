@@ -1,5 +1,9 @@
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Input } from "@nextui-org/input";
+import { Button } from "@nextui-org/button";
+import { Code } from "@nextui-org/code";
+import { Textarea } from "@nextui-org/input";
 
 type CalculationResponse = {
   result: string;
@@ -23,19 +27,21 @@ const DisplayCalculation = ({
 
   const { t } = useTranslation();
   return (
-    <div className="flex h-auto w-full flex-col">
-      <div className="mt-1 mb-1 h-10 content-center rounded-r rounded-l bg-green-700/75 text-center text-xl text-white">{`${t('calculator.answer')}: ${calculationResult?.result ?? ""}`}</div>
-      <textarea
-        className="h-10 w-full border-2 content-center"
+    <div className="flex w-full flex-col">
+      <Code color="success" className="text-lg text-center">{`${t('calculator.answer')}: ${calculationResult?.result ?? ""}`}</Code>
+      <Textarea
+        isReadOnly
+        className="h-10 w-full content-center"
         value={calculationResult?.trace?.postfix?.join(" ")}
       />
-      <button className="h-10 w-full border-2 bg-blue-50" onClick={toggleTrace}>
+      <Button color='secondary' onClick={toggleTrace}>
         {showTrace ? t('calculator.hideTrace') : t('calculator.showTrace')}
-      </button>
+      </Button>
       {showTrace && (
-        <textarea
-          className="h-screen w-full border-2"
-          value={JSON.stringify(calculationResult, null, 2)}
+        <Textarea
+          maxRows={30}
+          isReadOnly
+          defaultValue={JSON.stringify(calculationResult, null, 2)}
         />
       )}
     </div>
@@ -67,23 +73,23 @@ export const CalculateView = () => {
   }, [calculateText]);
 
   return (
-    <div className="mt-10 h-auto w-2/3">
+    <div className="mt-10 w-2/3">
       <div className="flex h-10 w-full">
-        <input
-          className="h-full w-full rounded-l-2xl border-2 text-center"
+        <Input
+          className="h-full w-full text-center"
           type="text"
           placeholder="1 + 2"
           value={calculateText}
           onChange={(e) => setCalculateText(e.target.value)}
         />
-        <button
-          className="rounded-r-2xl border-2 bg-sky-600 pr-4 pl-2 w-40 text-white hover:border-blue-950"
+        <Button
+          color="primary"
           onClick={calculateRequest}
         >
           {t('calculator.calculate')}
-        </button>
+        </Button>
       </div>
       <DisplayCalculation calculationResult={calculationResult} />
-    </div>
+    </div >
   );
 };

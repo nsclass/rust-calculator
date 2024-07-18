@@ -32,7 +32,8 @@ export const LangSelector = () => {
       </DropdownTrigger>
       <DropdownMenu
         aria-label="Single selection"
-        variant="flat"
+        color="primary"
+        variant="solid"
         disallowEmptySelection
         selectionMode="single"
         selectedKeys={selected.key}
