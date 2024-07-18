@@ -1,10 +1,10 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import Backend from "i18next-http-backend";
 import { DateTime } from "luxon";
+import enJson from "./locales/en/translation.json"
+import koJson from "./locales/ko/translation.json"
 
 i18n
-  .use(Backend)
   .use(initReactI18next) // passes i18n down to react-i18next
   .init({
     lng: "en", // if you're using a language detector, do not define the lng option
@@ -12,6 +12,18 @@ i18n
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
     },
+    resources: {
+      en: {
+        translation: {
+          ...enJson
+        }
+      },
+      ko: {
+        translation: {
+          ...koJson
+        }
+      }
+    }
   });
 
 // new usage
