@@ -32,17 +32,18 @@ export const LangSelector = () => {
       </DropdownTrigger>
       <DropdownMenu
         aria-label="Single selection"
-        variant="flat"
+        color="primary"
+        variant="solid"
         disallowEmptySelection
         selectionMode="single"
         selectedKeys={selected.key}
         onSelectionChange={(key: Selection) => {
           console.log(`key: ${JSON.stringify(key)}`);
-          const param = key as unknown as { currentKey: string }
-          const res = items.find((item) => item.key === param.currentKey)
-          const found = res ? res : items[0]
+          const param = key as unknown as { currentKey: string };
+          const res = items.find((item) => item.key === param.currentKey);
+          const found = res ? res : items[0];
 
-          i18n.changeLanguage(found.key)
+          i18n.changeLanguage(found.key);
           setSelected(found);
         }}
       >
