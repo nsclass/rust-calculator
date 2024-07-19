@@ -27,15 +27,18 @@ const DisplayCalculation = ({
 
   const { t } = useTranslation();
   return (
-    <div className="flex w-full flex-col">
-      <Code color="success" className="text-lg text-center">{`${t('calculator.answer')}: ${calculationResult?.result ?? ""}`}</Code>
+    <div className="flex w-full flex-col gap-2">
+      <Code
+        color="success"
+        className="text-lg text-center"
+      >{`${t("calculator.answer")}: ${calculationResult?.result ?? ""}`}</Code>
       <Textarea
         isReadOnly
         className="h-10 w-full content-center"
         value={calculationResult?.trace?.postfix?.join(" ")}
       />
-      <Button color='secondary' onClick={toggleTrace}>
-        {showTrace ? t('calculator.hideTrace') : t('calculator.showTrace')}
+      <Button color="secondary" onClick={toggleTrace}>
+        {showTrace ? t("calculator.hideTrace") : t("calculator.showTrace")}
       </Button>
       {showTrace && (
         <Textarea
@@ -74,7 +77,7 @@ export const CalculateView = () => {
 
   return (
     <div className="mt-10 w-2/3">
-      <div className="flex h-10 w-full">
+      <div className="flex h-10 w-full mb-5">
         <Input
           className="h-full w-full text-center"
           type="text"
@@ -82,14 +85,11 @@ export const CalculateView = () => {
           value={calculateText}
           onChange={(e) => setCalculateText(e.target.value)}
         />
-        <Button
-          color="primary"
-          onClick={calculateRequest}
-        >
-          {t('calculator.calculate')}
+        <Button color="primary" onClick={calculateRequest}>
+          {t("calculator.calculate")}
         </Button>
       </div>
       <DisplayCalculation calculationResult={calculationResult} />
-    </div >
+    </div>
   );
 };

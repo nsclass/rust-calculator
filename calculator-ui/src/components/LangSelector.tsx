@@ -39,11 +39,11 @@ export const LangSelector = () => {
         selectedKeys={selected.key}
         onSelectionChange={(key: Selection) => {
           console.log(`key: ${JSON.stringify(key)}`);
-          const param = key as unknown as { currentKey: string }
-          const res = items.find((item) => item.key === param.currentKey)
-          const found = res ? res : items[0]
+          const param = key as unknown as { currentKey: string };
+          const res = items.find((item) => item.key === param.currentKey);
+          const found = res ? res : items[0];
 
-          i18n.changeLanguage(found.key)
+          i18n.changeLanguage(found.key);
           setSelected(found);
         }}
       >
